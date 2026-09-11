@@ -1,0 +1,9 @@
+# Python is NOT required to build or run the vector database itself.
+# These two packages are needed ONLY by plot_results.py, an optional
+# helper script that turns results/benchmark.csv into a PNG chart.
+#
+#   pip install -r requirements.txt
+#   python3 plot_results.py
+
+pandas>=2.0
+matplotlib>=3.7
