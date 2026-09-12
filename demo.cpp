@@ -20,6 +20,7 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 namespace {
 constexpr std::size_t kDimension = 128;
@@ -59,18 +60,34 @@ int main() {
         if (line.empty()) continue;
 
         Vector q = dataset::embed_text(line, kDimension);
-        auto results = index.search(q, kTopK);
+        auto results = index.search(q, 30);
 
         if (results.empty()) {
             std::cout << "  (no results -- index is empty)\n\n";
             continue;
         }
 
-        std::cout << "\nTop " << results.size() << " matches:\n\n";
-        for (std::size_t i = 0; i < results.size(); ++i) {
-            std::cout << "  " << (i + 1) << ". Score: " << results[i].score << "\n";
-            std::cout << "     Text: \"" << index.get_text(results[i].id) << "\"\n\n";
-        }
+        std::cout << "\nTop 5 unique matches:\n\n";
+
+std::unordered_set<std::string> seen;
+std::size_t displayed = 0;
+
+for (const auto& result : results) {
+    std::string text = index.get_text(result.id);
+
+    if (!seen.insert(text).second) {
+        continue;  // Skip duplicate text
+    }
+
+    ++displayed;
+
+    std::cout << "  " << displayed << ". Score: " << result.score << "\n";
+    std::cout << "     Text: \"" << text << "\"\n\n";
+
+    if (displayed == kTopK) {
+        break;
+    }
+}
     }
 
     std::cout << "Goodbye.\n";
